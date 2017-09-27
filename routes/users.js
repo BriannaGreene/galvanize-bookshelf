@@ -7,24 +7,39 @@ const router = express.Router();
 
 // YOUR CODE HERE
 const knex = require('../knex')
+var bcrypt = require('bcrypt');
+const saltRounds = 10;
 
-router.post('/users', function(req, res, next) {
+router.post('/:id', function(req, res, next) {
   const b = req.body
-  console.log(b);
+  const id = req.params.id
 
-  knex('users')
-    .insert({
-      id: 2,
-      first_name: b.first_name,
-      last_name: b.last_name,
-      email: b.email,
-      hashed_password: b.password
-    })
-    .then(() => {
-      res.body({id})
-      res.sendStatus(200)
-    })
-    .catch((err) => next(err))
+  bcrypt.hash(b.password, saltRounds, function(err, hash) {
+
+    knex('users')
+      .insert({
+        // id: 2,
+        first_name: b.firstName,
+        last_name: b.lastName,
+        email: b.email,
+        hashed_password: hash
+      })
+      .returning('*')
+      .then((user) => {
+        const newUser = {
+          id: user[0].id,
+          firstName: user[0].first_name,
+          lastName: user[0].last_name,
+          email: user[0].email
+        }
+        res.setHeader('Content-Type', 'application/json')
+        res.status(200)
+        res.send(newUser)
+      })
+      .catch((err) => next(err))
+
+  });
+
 })
 
 module.exports = router;
