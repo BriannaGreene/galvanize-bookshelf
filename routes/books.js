@@ -39,38 +39,63 @@ router.get('/books/:id', function(req, res, next) {
 
 // post a new books
 router.post('/books', function(req, res, next) {
-  const { item } = req.body
 
   knex('books')
     .insert({
-      id: 9,
       title: req.body.title,
       author: req.body.author,
       genre: req.body.genre,
       description: req.body.description,
       cover_url: req.body.coverUrl
-    })
-    .then(() => {
+    }, '*')
+    .then((books) => {
+      const newObj = {
+        id: books[0].id,
+        title: books[0].title,
+        author: books[0].author,
+        genre: books[0].genre,
+        description: books[0].description,
+        coverUrl: books[0].cover_url
+      }
       res.setHeader('Content-Type', 'application/json')
-      res.sendStatus(200)
+      res.status(200)
+      res.send(newObj)
+
     })
     .catch((err) => next(err))
 })
 
 // patch
 router.patch('/books/:id', function(req, res, next) {
-  const { item } = req.body
+  // const { item } = req.body
   const id = req.params.id
+  // const title = req.body.title
 
   knex('books')
-    .update({title: req.body.title, author: req.body.author, genre: req.body.genre, description: req.body.description, cover_url: req.body.coverUrl })
-    .where('id', id)
-    .then((rowsAffected) => {
-      if (rowsAffected !== 1) {
+    .where('id', id )
+    .returning('*')
+    .update({
+      title: req.body.title,
+      author: req.body.author,
+      genre: req.body.genre,
+      description: req.body.description,
+      cover_url: req.body.coverUrl
+    }, '*')
+    .then((books) => {
+      if (books == undefined) {
         return res.sendStatus(404)
       }
+      const newObj = {
+        id: books[0].id,
+        title: books[0].title,
+        author: books[0].author,
+        genre: books[0].genre,
+        description: books[0].description,
+        coverUrl: books[0].cover_url
+      }
       res.setHeader('Content-Type', 'application/json')
-      res.sendStatus(200)
+      res.status(200)
+      res.send(newObj)
     })
     .catch((err) => next(err))
 })
@@ -80,14 +105,23 @@ router.delete('/books/:id', function(req, res, next) {
   const id = req.params.id
 
   knex('books')
-    .del()
     .where('id', id)
-    .then((rowsAffected) => {
-      if (rowsAffected !== 1) {
-        return res.sendStatus(404)
+    .del()
+    .returning('*')
+    .then((books) => {
+      if (books == undefined) {
+        return res.status(404)
+      }
+      const newObj = {
+        title: books[0].title,
+        author: books[0].author,
+        genre: books[0].genre,
+        description: books[0].description,
+        coverUrl: books[0].cover_url
       }
       res.setHeader('Content-Type', 'application/json')
-      res.sendStatus(200)
+      res.status(200)
+      res.send(newObj)
     })
     .catch((err) => next(err))
 })
