@@ -14,7 +14,7 @@ let bcrypt = require('bcrypt')
 router.use(cp())
 
 router.get('/token', function(req, res, next) {
-  var token = req.cookies.token
+  let token = req.cookies.token
   // is there a token?
   jwt.verify(token, 'cookiez?', function(err, decoded) {
     if (decoded) {
@@ -33,6 +33,11 @@ router.post('/token', function(req, res, next) {
     .select('id', 'email', 'hashed_password', 'first_name', 'last_name')
     .where('email', req.body.email)
     .then((items) => {
+      if (items.length < 1) {
+        res.setHeader('Content-Type', 'text/plain')
+        res.status(400)
+        return res.send('Bad email or password')
+      }
       // testing to see if password is a match
       bcrypt.compare(req.body.password, items[0].hashed_password, function(err, test) {
 
@@ -51,6 +56,7 @@ router.post('/token', function(req, res, next) {
           return res.send(response)
         }
         else {
+          res.setHeader('Content-Type', 'text/plain')
           res.status(400)
           res.send('Bad email or password')
         }
@@ -59,11 +65,14 @@ router.post('/token', function(req, res, next) {
     .catch((err) => next(err))
 })
 
+router.delete('/token', function(req, res, next) {
+  let token = req.cookies.token
+  token = ''
+  res.cookie('token', token, {httpOnly: true})
+  res.status(200)
+  res.send(true)
 
-
-
-
-
+})
 
 
 module.exports = router;
