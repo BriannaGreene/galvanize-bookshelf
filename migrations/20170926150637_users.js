@@ -4,7 +4,7 @@ exports.up = function(knex, Promise) {
     t.increments()
     t.varchar('first_name', 255).notNullable().defaultTo("")
     t.varchar('last_name', 255).notNullable().defaultTo("")
-    t.varchar('email', 255).notNullable()
+    t.varchar('email', 255)
     t.specificType('hashed_password', 'char(60)').notNullable()
     t.timestamps(true, true)
   })
