@@ -49,7 +49,7 @@ router.post('/token', function(req, res, next) {
             lastName: items[0].last_name
           }
           // set cookie token?
-          var token = jwt.sign({  "email": req.body.email, "password": req.body.password  }, 'cookiez?')
+          let token = jwt.sign({  "email": req.body.email, "password": req.body.password  }, 'cookiez?')
           res.cookie('token', token, {httpOnly: true})
           res.setHeader('Content-Type', 'application/json')
           res.status(200)
