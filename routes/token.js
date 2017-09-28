@@ -62,7 +62,6 @@ router.post('/token', function(req, res, next) {
         }
       })
     })
-    .catch((err) => next(err))
 })
 
 router.delete('/token', function(req, res, next) {
@@ -71,7 +70,6 @@ router.delete('/token', function(req, res, next) {
   res.cookie('token', token, {httpOnly: true})
   res.status(200)
   res.send(true)
-
 })
 
 
