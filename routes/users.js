@@ -7,7 +7,8 @@ const router = express.Router();
 
 // YOUR CODE HERE
 const knex = require('../knex')
-var bcrypt = require('bcrypt');
+const bcrypt = require('bcrypt')
+const jwt = require('jsonwebtoken')
 const saltRounds = 10;
 
 router.post('/:id', function(req, res, next) {
