@@ -11,6 +11,8 @@ let jwt = require('jsonwebtoken')
 let cp = require('cookie-parser')
 let bcrypt = require('bcrypt')
 
+router.use(cp())
+
 router.get('/favorites', function(req, res, next) {
   knex('favorites as f')
     .join('books as b', function() {
@@ -38,22 +40,18 @@ router.get('/favorites', function(req, res, next) {
 
 router.get('/favorites/check?', function(req, res, next) {
   let reqId = req.query.bookId
-  console.log('query: ', req.query);
 
   knex('favorites')
     .select('book_id')
     .then((data) => {
-      console.log('data: ', data[0].book_id);
-      console.log('reqid: ', reqId);
       if (data[0].book_id == reqId) {
         res.setHeader('Content-Type', 'application/json')
         res.status(200)
         return res.send(true)
       }
       else {
-        console.log('badness')
         res.setHeader('Content-Type', 'application/json')
-        res.status(401)
+        res.status(200)
         return res.send(false)
       }
     })
@@ -61,7 +59,25 @@ router.get('/favorites/check?', function(req, res, next) {
 
 router.post('/favorites', function(req, res, next) {
   let reqBody = req.body
-  console.log('request body: ', reqBody);
+  let token = req.cookies.token
+  var decoded = jwt.verify(token, 'cookiez?');
+
+  knex('favorites')
+    .insert({'user_id': decoded.userId, 'book_id': reqBody.bookId}, '*')
+    .then((items) => {
+      let newFav = {
+        id: items[0].id,
+        bookId: items[0].book_id,
+        userId: items[0].user_id
+      }
+      res.setHeader('Content-Type', 'application/json')
+      res.status(200)
+      res.send(newFav)
+    })
+})
+
+router.delete(/favorites, function(req, res, next) {
+
 })
 
 module.exports = router;
